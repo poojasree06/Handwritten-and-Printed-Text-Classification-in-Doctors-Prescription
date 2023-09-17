@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter as ttk
 from PIL import ImageTk, Image
 import os
-from tkinter.filedialog import askopenfilename
+from tkinter import filedialog
 import cv2
 import numpy as np
 from os import listdir

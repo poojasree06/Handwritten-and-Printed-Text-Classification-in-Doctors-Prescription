@@ -31,12 +31,12 @@ for s in onlyfiles:
 		contours2, hierarchy = cv2.findContours(gray,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
 		x=0
 		while x<len(contours2):
-    			(start_x,start_y,width,height)= cv2.boundingRect(contours2[x])
-    			cv2.rectangle(img, (start_x,start_y),(width+start_x,height+start_y),(255,0 , 0), 2)
-    			maskROI = fram[start_y:start_y+height, start_x:start_x+width]
-    			cv2.imwrite(des2+str(tracker)+".png",maskROI)
-    			tracker=tracker+1
-    			x=x+1
+					(start_x,start_y,width,height)= cv2.boundingRect(contours2[x])
+					cv2.rectangle(img, (start_x,start_y),(width+start_x,height+start_y),(255,0 , 0), 2)
+					maskROI = fram[start_y:start_y+height, start_x:start_x+width]
+					cv2.imwrite(des2+str(tracker)+".png",maskROI)
+					tracker=tracker+1
+					x=x+1
 		ret,gray = cv2.threshold(gray,10,255,cv2.THRESH_BINARY_INV)
 		#cv2.imshow('gray',gray)
 		cv2.imwrite(des+'res'+s,img)
