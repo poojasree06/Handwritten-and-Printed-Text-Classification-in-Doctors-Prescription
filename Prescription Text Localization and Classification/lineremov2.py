@@ -68,14 +68,14 @@ def checker(img):
 
 
 
-onlyfiles = [f for f in listdir('/home/dj/Downloads/Prescription_Samples/C') if isfile(join('/home/dj/Downloads/Prescription_Samples/C', f))]
-des = '/home/dj/Downloads/Prescription_Samples/D/'
-des2 = '/home/dj/Downloads/Prescription_Samples/E/'
+onlyfiles = [f for f in listdir('/home/pooja/Handwritten-and-Printed-Text-Classification-in-Doctors-Prescription/Prescription Text Localization and Classification/Prescription_Samples/C') if isfile(join('/home/pooja/Handwritten-and-Printed-Text-Classification-in-Doctors-Prescription/Prescription Text Localization and Classification/Prescription_Samples/C', f))]
+des = '/home/pooja/Handwritten-and-Printed-Text-Classification-in-Doctors-Prescription/Prescription Text Localization and Classification/Prescription_Samples/D/'
+des2 = '/home/pooja/Handwritten-and-Printed-Text-Classification-in-Doctors-Prescription/Prescription Text Localization and Classification/Prescription_Samples/E/'
 tracker=0
 for s in onlyfiles:
 	try:
 		#s = 'sample6.jpg'
-		img = cv2.imread('/home/dj/Downloads/Prescription_Samples/C/'+s)
+		img = cv2.imread('/home/pooja/Handwritten-and-Printed-Text-Classification-in-Doctors-Prescription/Prescription Text Localization and Classification/Prescription_Samples/C/'+s)
 		fram = img.copy()
 		#if not img.shape():
 		#	continue
