@@ -1,6 +1,5 @@
 from tkinter import *
 import tkinter as tk
-import tkinter as ttk
 from PIL import ImageTk, Image
 import os
 from tkinter import filedialog
@@ -8,13 +7,6 @@ import cv2
 import numpy as np
 from os import listdir
 from os.path import isfile, join
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from joblib import dump, load
-import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -99,7 +91,7 @@ def Classify(filename,hubba):
     kernel = np.ones((5,5), np.uint8)
     ret2,gray = cv2.threshold(gray,10,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     gray = cv2.dilate(gray, kernel, iterations=1) 
-    contours2, hierarchy = cv2.findContours(gray,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
+    contours2, hierarchy = cv2.findContours(gray,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     x=0
     clf = load("data.joblib")
     while x<len(contours2):
