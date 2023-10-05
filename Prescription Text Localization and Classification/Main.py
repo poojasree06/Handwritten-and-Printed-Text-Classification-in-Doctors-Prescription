@@ -48,7 +48,7 @@ def checker(img):
 	dj.append(arr)
 	return dj
 
-def Classify(filename,hubba):
+def Classify(filename,segments_directory):
     img = cv2.imread(filename)
     hgt=img.shape[0]
     wdt=img.shape[1]
@@ -67,20 +67,17 @@ def Classify(filename,hubba):
     contours2, hierarchy = cv2.findContours(gray,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
     x=0
     clf = load("data.joblib")
+    
+    contours2 = sorted(contours2, key=lambda c: cv2.boundingRect(c)[1])  # Sort by y-coordinate, need to use custom comparator ?
     while x<len(contours2):
         (start_x,start_y,width,height)= cv2.boundingRect(contours2[x])
-        mymat = img[start_y:start_y+height, start_x:start_x+width]
-        dect = tester(clf,checker(mymat))
-        #print(dect)
-        if dect == 'Printed_extended':
-            cv2.rectangle(img, (start_x,start_y),(width+start_x,height+start_y),(255,0 , 0), 2)
-        if dect == 'Handwritten_extended':
-            cv2.rectangle(img, (start_x,start_y),(width+start_x,height+start_y),(0,255 , 0), 2)
-        if dect == 'Mixed_extended':
-            cv2.rectangle(img, (start_x,start_y),(width+start_x,height+start_y),(0,0 ,255), 2)
-        if dect == 'Other_extended':
-            cv2.rectangle(img, (start_x,start_y),(width+start_x,height+start_y),(0,255 ,255), 2)
-        maskROI = fram[start_y:start_y+height, start_x:start_x+width]
+        segment = img[start_y:start_y+height, start_x:start_x+width]
+
+        segment_name = f'segment_{x:02d}.jpg'
+        
+        # Save the segment in the output directory
+        segment_path = os.path.join(segments_directory, segment_name)
+        cv2.imwrite(segment_path, segment)
         x=x+1
     return img
 
@@ -111,12 +108,12 @@ def upload_prescription():
             
             result_label.config(text=f"'{original_filename}' has been uploaded with identifier '{identifier}'into the database.")
 
-            hubba=[[]]
-            saveImage=Classify(prescription_dest_path,hubba)
-            
             # Create the SEGMENTS directory
             segments_directory = os.path.join(main_directory, 'SEGMENTS')
             os.makedirs(segments_directory, exist_ok=True)
+            
+            saveImage=Classify(prescription_dest_path,segments_directory)
+            
             
             segment_dest_path = os.path.join(segments_directory, "temp.png")
             cv2.imwrite(segment_dest_path,saveImage)
