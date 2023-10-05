@@ -48,37 +48,63 @@ def checker(img):
 	dj.append(arr)
 	return dj
 
-def Classify(filename,segments_directory):
+def Classify(filename, main_directory):
     img = cv2.imread(filename)
-    hgt=img.shape[0]
-    wdt=img.shape[1]
-    hBw=hgt/float(wdt)
+    hgt = img.shape[0]
+    wdt = img.shape[1]
+    hBw = hgt / float(wdt)
     dim = (576, int(576 * hBw))
     fram = img.copy()
-    img=cv2.resize(img,dim)
-    gray=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    linek = np.zeros((11,11),dtype=np.uint8)
-    linek[5,...]=1
-    x=cv2.morphologyEx(gray, cv2.MORPH_OPEN, linek ,iterations=1)
-    gray-=x
-    kernel = np.ones((5,5), np.uint8)
-    ret2,gray = cv2.threshold(gray,10,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    gray = cv2.dilate(gray, kernel, iterations=1) 
-    contours2, hierarchy = cv2.findContours(gray,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
-    x=0
+    img = cv2.resize(img, dim)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    linek = np.zeros((11, 11), dtype=np.uint8)
+    linek[5, ...] = 1
+    x = cv2.morphologyEx(gray, cv2.MORPH_OPEN, linek, iterations=1)
+    gray -= x
+    kernel = np.ones((5, 5), np.uint8)
+    ret2, gray = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    gray = cv2.dilate(gray, kernel, iterations=1)
+    contours2, hierarchy = cv2.findContours(gray, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    x = 0
     clf = load("data.joblib")
     
-    contours2 = sorted(contours2, key=lambda c: cv2.boundingRect(c)[1])  # Sort by y-coordinate, need to use custom comparator ?
-    while x<len(contours2):
-        (start_x,start_y,width,height)= cv2.boundingRect(contours2[x])
-        segment = img[start_y:start_y+height, start_x:start_x+width]
+    # Create the SEGMENTS directory
+    segment_directory = os.path.join(main_directory, 'SEGMENTS')
+    os.makedirs(segment_directory, exist_ok=True)
+    
 
-        segment_name = f'segment_{x:02d}.jpg'
-        
-        # Save the segment in the output directory
-        segment_path = os.path.join(segments_directory, segment_name)
-        cv2.imwrite(segment_path, segment)
-        x=x+1
+    
+    # Initialize counters
+    segment_counter = 0
+    excess_counter = 0
+
+    contours2 = sorted(contours2, key=lambda c: cv2.boundingRect(c)[1])  # Sort by y-coordinate
+    
+    for contour in contours2:
+        if segment_counter < 100:
+
+            (start_x, start_y, width, height) = cv2.boundingRect(contour)
+            segment = img[start_y:start_y+height, start_x:start_x+width]
+            segment_name = f'{segment_counter:02d}.jpg'
+            segment_path = os.path.join(segment_directory, segment_name)
+            cv2.imwrite(segment_path, segment)
+            
+            segment_counter += 1
+        else:
+            # Store excess segments in the 'OTHERS' directory
+            if excess_counter == 0:
+                   # Create a directory for excess segments
+                    other_directory = os.path.join(main_directory, 'OTHERS')
+                    os.makedirs(other_directory, exist_ok=True)
+            
+            (start_x, start_y, width, height) = cv2.boundingRect(contour)
+            excess_segment = img[start_y:start_y+height, start_x:start_x+width]
+            excess_name = f'{excess_counter:02d}.jpg'
+            excess_path = os.path.join(other_directory, excess_name)
+            cv2.imwrite(excess_path, excess_segment)
+            
+            excess_counter += 1
+    
     return img
 
 
@@ -108,15 +134,11 @@ def upload_prescription():
             
             result_label.config(text=f"'{original_filename}' has been uploaded with identifier '{identifier}'into the database.")
 
-            # Create the SEGMENTS directory
-            segments_directory = os.path.join(main_directory, 'SEGMENTS')
-            os.makedirs(segments_directory, exist_ok=True)
+
+            saveImage=Classify(prescription_dest_path,main_directory)
             
-            saveImage=Classify(prescription_dest_path,segments_directory)
-            
-            
-            segment_dest_path = os.path.join(segments_directory, "temp.png")
-            cv2.imwrite(segment_dest_path,saveImage)
+            # segment_dest_path = os.path.join(segments_directory, "temp.png")
+            # cv2.imwrite(segment_dest_path,saveImage)
 
 
 
