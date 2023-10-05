@@ -9,45 +9,6 @@ from joblib import load
 global hubba
 
 
-def tester(clf,mpred):
-	clf = load("data.joblib")
-	dj = clf.predict(mpred)
-	print(dj[0])
-	return dj[0]
-
-def checker(img):	
-	arr=[]
-	dj=[]
-	rows = img.shape[0]
-	cols = img.shape[1]
-	img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-	arr.append(rows)
-	arr.append(cols)
-	arr.append(rows/cols)
-	retval,bwMask =cv2.threshold(img, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-	mycnt=0
-	myavg=0
-	for xx in range (0,cols):
-		mycnt=0
-		for yy in range (0,rows):
-			if bwMask[yy,xx]==0:
-				mycnt=mycnt+1
-				
-		myavg=myavg+(mycnt*1.0)/rows
-	myavg=myavg/cols
-	arr.append(myavg)
-	change=0
-	for xx in range (0,rows):
-		mycnt=0
-		for yy in range (0,cols-1):
-			if bwMask[xx:yy].all()!=bwMask[xx:yy+1].all():
-				mycnt=mycnt+1
-		change=change+(mycnt*1.0)/cols
-	change=change/(rows)
-	arr.append(change)
-	dj.append(arr)
-	return dj
-
 def Classify(filename, main_directory):
     img = cv2.imread(filename)
     hgt = img.shape[0]
