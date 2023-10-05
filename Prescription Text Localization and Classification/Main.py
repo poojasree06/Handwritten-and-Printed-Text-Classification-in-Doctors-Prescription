@@ -8,6 +8,45 @@ import numpy as np
 from joblib import load
 global hubba
 
+def tester(clf,mpred):
+	clf = load("data.joblib")
+	dj = clf.predict(mpred)
+	print(dj[0])
+	return dj[0]
+
+def checker(img):	
+
+	arr=[]
+	dj=[]
+	rows = img.shape[0]
+	cols = img.shape[1]
+	img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+	arr.append(rows)
+	arr.append(cols)
+	arr.append(rows/cols)
+	retval,bwMask =cv2.threshold(img, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+	mycnt=0
+	myavg=0
+	for xx in range (0,cols):
+		mycnt=0
+		for yy in range (0,rows):
+			if bwMask[yy,xx]==0:
+				mycnt=mycnt+1		
+		myavg=myavg+(mycnt*1.0)/rows
+	myavg=myavg/cols
+	#print(myavg)
+	arr.append(myavg)
+	change=0
+	for xx in range (0,rows):
+		mycnt=0
+		for yy in range (0,cols-1):
+			if bwMask[xx:yy].all()!=bwMask[xx:yy+1].all():
+				mycnt=mycnt+1
+		change=change+(mycnt*1.0)/cols
+	change=change/(rows)
+	arr.append(change)
+	dj.append(arr)
+	return dj
 
 def Classify(filename, main_directory):
     img = cv2.imread(filename)
@@ -42,15 +81,18 @@ def Classify(filename, main_directory):
     contours2 = sorted(contours2, key=lambda c: cv2.boundingRect(c)[1])  # Sort by y-coordinate
     
     for contour in contours2:
+        
         if segment_counter < 100:
 
             (start_x, start_y, width, height) = cv2.boundingRect(contour)
             segment = img[start_y:start_y+height, start_x:start_x+width]
-            segment_name = f'{segment_counter:02d}.jpg'
-            segment_path = os.path.join(segment_directory, segment_name)
-            cv2.imwrite(segment_path, segment)
+            dect = tester(clf,checker(segment))
+            if dect!='Other_extended':
+                segment_name = f'{segment_counter:02d}.jpg'
+                segment_path = os.path.join(segment_directory, segment_name)
+                cv2.imwrite(segment_path, segment)
             
-            segment_counter += 1
+                segment_counter += 1
         else:
             # Store excess segments in the 'OTHERS' directory
             if excess_counter == 0:
@@ -60,11 +102,13 @@ def Classify(filename, main_directory):
             
             (start_x, start_y, width, height) = cv2.boundingRect(contour)
             excess_segment = img[start_y:start_y+height, start_x:start_x+width]
-            excess_name = f'{excess_counter:02d}.jpg'
-            excess_path = os.path.join(other_directory, excess_name)
-            cv2.imwrite(excess_path, excess_segment)
+            dect = tester(clf,checker(excess_segment))
+            if dect!='Other_extended':
+                excess_name = f'{excess_counter:02d}.jpg'
+                excess_path = os.path.join(other_directory, excess_name)
+                cv2.imwrite(excess_path, excess_segment)
             
-            excess_counter += 1
+                excess_counter += 1
     
     return img
 
@@ -98,7 +142,7 @@ def upload_prescription():
 
             saveImage=Classify(prescription_dest_path,main_directory)
             
-            # segment_dest_path = os.path.join(segments_directory, "temp.png")
+            # segment_dest_path = os.path.join(main_directory, "temp.png")
             # cv2.imwrite(segment_dest_path,saveImage)
 
 
